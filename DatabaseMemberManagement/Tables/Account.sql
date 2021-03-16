@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[Account]
+(
+	[Name] VARCHAR(50) NOT NULL PRIMARY KEY,
+	[Balance] INT NOT NULL,
+	[Status] VARCHAR(10) NOT NULL,
+	[MemberName] VARCHAR(50) NOT NULL FOREIGN KEY (MemberName) REFERENCES Member(Name)
+)

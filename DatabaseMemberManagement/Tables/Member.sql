@@ -1,0 +1,5 @@
+﻿CREATE TABLE [dbo].[Member]
+(
+	[Name] VARCHAR(50) NOT NULL PRIMARY KEY,
+	[Address] VARCHAR(50) NOT NULL
+)
