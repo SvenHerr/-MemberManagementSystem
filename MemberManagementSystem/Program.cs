@@ -43,7 +43,7 @@ namespace MemberManagementSystem
                     }
                     catch{}
 
-                    Console.WriteLine("Zahl nicht erkannt. Bitte nur 1 bis 6 eingeben" + Environment.NewLine);
+                    Console.WriteLine("Not a number. Please enter a number between 1 and 6" + Environment.NewLine);
                     terminar = false;
                 }
 
@@ -96,8 +96,8 @@ namespace MemberManagementSystem
         {
             var user1 = new Member();
 
-            Console.WriteLine("Bitte Vor- und Nachnamen eingeben:");
-            Console.WriteLine("Syntax-Beispiel: Max Mustermann");
+            Console.WriteLine("Please enter Name:");
+            Console.WriteLine("Example: Max Mustermann");
             user1.Name = CheckIfExit(Console.ReadLine());
 
 
@@ -108,8 +108,8 @@ namespace MemberManagementSystem
             while (nameExist)
             {
                 Console.WriteLine("Membername already exist!:");
-                Console.WriteLine("Bitte Vor- und Nachnamen eingeben:");
-                Console.WriteLine("Syntax-Beispiel: Max Mustermann");
+                Console.WriteLine("Please enter Name:");
+                Console.WriteLine("Example: Max Mustermann");
                 user1.Name = CheckIfExit(Console.ReadLine());
 
                 nameExist = dbHelper.CheckIfMembernameExist(user1.Name).Result;
@@ -159,8 +159,8 @@ namespace MemberManagementSystem
                 accountExistes = dbHelper.CheckIfAccountNameExist(account.Name).Result;
             }
 
-            Console.WriteLine("Bitte Start-Balance eingeben:");
-            Console.WriteLine("Syntax-Beispiel: 0 (ohne Komma)");
+            Console.WriteLine("Please enter start balance:");
+            Console.WriteLine("Example: 0 (without comma)");
 
             try
             {
@@ -172,8 +172,8 @@ namespace MemberManagementSystem
                 account.Balance = 0;
             }
 
-            Console.WriteLine("Bitte Status des Accounts eingeben: a  für aktiv oder i für inaktiv");
-            Console.WriteLine("Syntax-Beispiel: a oder i");
+            Console.WriteLine("Please enter Status: a  for activ or i for inactive");
+            Console.WriteLine("Example: a oder i");
 
 
             if (CheckIfExit(Console.ReadLine()) == "a")
@@ -187,6 +187,7 @@ namespace MemberManagementSystem
             else
             {
                 Console.WriteLine("Eingabe nicht erkannt. Der Account wird auf inaktiv gesetzt.");
+                Console.WriteLine("Couldn't read status. Status is now incactive.");
                 account.Status = "inactive";
             }
 
@@ -202,13 +203,13 @@ namespace MemberManagementSystem
 
         public static void CollectCoints()
         {
-            Console.WriteLine(Environment.NewLine + "Bitte Account-Namen eingeben:");
-            Console.WriteLine("Syntax-Beispiel: Burger King");
+            Console.WriteLine(Environment.NewLine + "Please enter Accountname:");
+            Console.WriteLine("Example: Burger King");
 
             var accountName = CheckIfExit(Console.ReadLine());
 
-            Console.WriteLine("Bitte Anzahl an Coints eingeben:");
-            Console.WriteLine("Syntax-Beispiel: 1 oder 2 oder 3 usw.");
+            Console.WriteLine("Please enter number of coints:");
+            Console.WriteLine("Example: 1 or 2 or 3 etc.");
 
             var valueCoints = 0;
             try
@@ -248,13 +249,13 @@ namespace MemberManagementSystem
 
         public static void RedeemCoints()
         {
-            Console.WriteLine(Environment.NewLine + "Bitte Account-Namen eingeben:");
-            Console.WriteLine("Syntax-Beispiel: Burger King");
+            Console.WriteLine(Environment.NewLine + "Please enter Accountname:");
+            Console.WriteLine("Example: Burger King");
 
             var accountName = CheckIfExit(Console.ReadLine());
 
-            Console.WriteLine("Bitte Anzahl an Coints eingeben:");
-            Console.WriteLine("Syntax-Beispiel: 1 oder 2 oder 3 usw.");
+            Console.WriteLine("Please enter value of coints:");
+            Console.WriteLine("Example: 1 oder 2 oder 3 usw.");
 
             var valueCoints = 0;
             try
