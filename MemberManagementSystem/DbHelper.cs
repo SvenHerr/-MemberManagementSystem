@@ -35,7 +35,7 @@ namespace MemberManagementSystem
             }
             catch (Exception ex)
             {
-                // Log Exception
+                LogHelper.WriteToLogWithInfos(ex.ToString(), "DbHelper", "StoreMemberToDb");
                 return false;
             }
         }
@@ -67,7 +67,7 @@ namespace MemberManagementSystem
             }
             catch (Exception ex)
             {
-                // Log Exception
+                LogHelper.WriteToLogWithInfos(ex.ToString(), "DbHelper", "StoreAccountToDb");
                 return false;
             }
         }
@@ -82,10 +82,7 @@ namespace MemberManagementSystem
                 {
                     currentBalance = GetBalance(account.Name).Result;
                 }
-                catch (Exception ex)
-                {
-
-                }
+                catch { }
 
                 using (var connection = new SqlConnection(CONNECTIONSTRING))
                 {
@@ -121,7 +118,7 @@ namespace MemberManagementSystem
             }
             catch (Exception ex)
             {
-                // Log Exception
+                LogHelper.WriteToLogWithInfos(ex.ToString(), "DbHelper", "CollectCoinsDb");
                 return false;
             }
         }
@@ -148,9 +145,8 @@ namespace MemberManagementSystem
                 {
                     currentBalance = GetBalance(account.Name).Result;
                 }
-                catch(Exception ex)
-                {
-                }
+                catch
+                {}
 
                 if(IsBalancePositiv(currentBalance, account.Balance) == false)
                 {
@@ -175,7 +171,7 @@ namespace MemberManagementSystem
             }
             catch (Exception ex)
             {
-                // Log Exception
+                LogHelper.WriteToLogWithInfos(ex.ToString(), "DbHelper", "RedeemCoinsDb");
                 return false;
             }
         }
@@ -210,6 +206,7 @@ namespace MemberManagementSystem
             }
             catch (Exception ex)
             {
+                LogHelper.WriteToLogWithInfos(ex.ToString(), "DbHelper", "GetBalance");
                 throw ex;
             }
         }
@@ -263,6 +260,7 @@ namespace MemberManagementSystem
             }
             catch (Exception ex)
             {
+                LogHelper.WriteToLogWithInfos(ex.ToString(), "DbHelper", "GetMember");
                 throw ex;
             }
         }
@@ -303,6 +301,7 @@ namespace MemberManagementSystem
             }
             catch (Exception ex)
             {
+                LogHelper.WriteToLogWithInfos(ex.ToString(), "DbHelper", "GetAccounts");
                 throw ex;
             }
         }
@@ -345,7 +344,7 @@ namespace MemberManagementSystem
             }
             catch (Exception ex)
             {
-                // Log Exception
+                LogHelper.WriteToLogWithInfos(ex.ToString(), "DbHelper", "CheckIfMembernameExist");
                 return false;
             }
         }
@@ -388,6 +387,7 @@ namespace MemberManagementSystem
             }
             catch (Exception ex)
             {
+                LogHelper.WriteToLogWithInfos(ex.ToString(), "DbHelper", "CheckIfMembernameExist");
                 throw ex;
             }
         }

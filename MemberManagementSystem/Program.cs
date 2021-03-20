@@ -23,6 +23,7 @@ namespace MemberManagementSystem
                 Console.WriteLine("4: Redeem Coints");
                 //Console.WriteLine("5: Import Json");
                 Console.WriteLine("5: Export Json");
+                Console.WriteLine("6: Dump Logfile");
 
                 Console.WriteLine("Please select an option by type the number and hit enter" + Environment.NewLine);
 
@@ -73,9 +74,30 @@ namespace MemberManagementSystem
                 case 5:
                     Export();
                     break;
+                case 6:
+                    DumpLogFile();
+                    break;
             }
         }
 
+        public static void DumpLogFile()
+        {
+            try
+            {
+                Console.WriteLine("Please enter path:(leave empty for default path)");
+                var path = CheckIfExit(Console.ReadLine());
+
+                Console.WriteLine("Please enter logname:(leave empty for default name)");
+                var name = CheckIfExit(Console.ReadLine());
+
+                LogHelper.DumpLog(path, name);
+            }
+            catch(Exception ex)
+            {
+                LogHelper.WriteToLogWithInfos(ex.ToString(), "Program", "DumpLogFile");
+            }
+            
+        }
         public static string CheckIfExit(string value)
         {
             if (value.Contains("exit") || value.Contains("Exit"))
