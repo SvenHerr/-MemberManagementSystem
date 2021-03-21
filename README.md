@@ -1,6 +1,6 @@
 # -MemberManagementSystem
 
-I got an assignment for an interview. I added the task dump log to the assignment.
+Possible interview question!
 
 Please implement a Member Management System. We need to save and manage information about our 
 members (name and address). Each member can have one or more accounts where he or she can collect 
@@ -17,11 +17,9 @@ The system could cover the following use cases:
 5. user can initially import existing members in a JSON format (example is attached)
 6. user can export all members based on filter criteria (e.g.: export all members that have at least 20 
 points on an inactive account)
+7. Dump generaded log (generate logfiles)
 
 There is no need to implement the GUI. You can implement the assignment as a console application, 
 desktop application or Web API. It is up to you.
-
-My added task is. 
-- Dump the log into the console
 
 If you have any suggestion or question please contact me here: info@herrmannsven.de
