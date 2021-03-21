@@ -50,15 +50,17 @@ namespace MemberManagementSystem
                     connection.Open();
 
                     //Compose query using sql parameters
-                    var sqlCommand = "INSERT INTO Account (Name, Balance, Status, MemberName) VALUES (@value1,@value2,@value3,@value4)";
+                    var sqlCommand = "INSERT INTO Account (AccountId, Name, Balance, Status, MemberName) VALUES (@value1,@value2,@value3,@value4,@value5)";
 
+                    account.AccountId = account.Name + account.MemberName;
                     //Create mysql command and pass sql query
                     using (var command = new SqlCommand(sqlCommand, connection))
                     {
-                        command.Parameters.AddWithValue("@value1", account.Name);
-                        command.Parameters.AddWithValue("@value2", account.Balance);
-                        command.Parameters.AddWithValue("@value3", account.Status);
-                        command.Parameters.AddWithValue("@value4", account.MemberName);
+                        command.Parameters.AddWithValue("@value1", account.AccountId);
+                        command.Parameters.AddWithValue("@value2", account.Name);
+                        command.Parameters.AddWithValue("@value3", account.Balance);
+                        command.Parameters.AddWithValue("@value4", account.Status);
+                        command.Parameters.AddWithValue("@value5", account.MemberName);
                         command.ExecuteNonQuery();
                     }
 
@@ -80,7 +82,7 @@ namespace MemberManagementSystem
 
                 try
                 {
-                    currentBalance = GetBalance(account.Name).Result;
+                    currentBalance = GetBalance(account.AccountId).Result;
                 }
                 catch { }
 
@@ -90,10 +92,10 @@ namespace MemberManagementSystem
                     connection.Open();
 
                     int accountExist = 0;
-                    var sqlCommand = "SELECT COUNT(*) FROM Account WHERE Name =@value1";
+                    var sqlCommand = "SELECT COUNT(*) FROM Account WHERE AccountId =@value1";
                     using (var command = new SqlCommand(sqlCommand, connection))
                     {
-                        command.Parameters.AddWithValue("@value1", account.Name);
+                        command.Parameters.AddWithValue("@value1", account.AccountId);
                         accountExist = (int)command.ExecuteScalar();
                     }
 
@@ -104,12 +106,12 @@ namespace MemberManagementSystem
                     }
 
                    
-                    var sqlCommand1 = "Update Account SET Balance=@value1 WHERE Name =@value2";
+                    var sqlCommand1 = "Update Account SET Balance=@value1 WHERE AccountId =@value2";
                     
                     using (var command = new SqlCommand(sqlCommand1, connection))
                     {
                         command.Parameters.AddWithValue("@value1", account.Balance + currentBalance);
-                        command.Parameters.AddWithValue("@value2", account.Name);
+                        command.Parameters.AddWithValue("@value2", account.AccountId);
                         command.ExecuteNonQuery();
                     }
 
@@ -143,7 +145,7 @@ namespace MemberManagementSystem
 
                 try
                 {
-                    currentBalance = GetBalance(account.Name).Result;
+                    currentBalance = GetBalance(account.AccountId).Result;
                 }
                 catch
                 {}
@@ -157,12 +159,12 @@ namespace MemberManagementSystem
                 {
                     connection.Open();
 
-                    var sqlCommand = "Update Account SET Balance=@value1 WHERE (Name=@value2 AND Status='active')";
+                    var sqlCommand = "Update Account SET Balance=@value1 WHERE (AccountId=@value2 AND Status='active')";
 
                     using (var command = new SqlCommand(sqlCommand, connection))
                     {
                         command.Parameters.AddWithValue("@value1", currentBalance - account.Balance);
-                        command.Parameters.AddWithValue("@value2", account.Name);
+                        command.Parameters.AddWithValue("@value2", account.AccountId);
                         command.ExecuteNonQuery();
                     }
 
@@ -176,7 +178,7 @@ namespace MemberManagementSystem
             }
         }
 
-        public async Task<int> GetBalance(string membername)
+        public async Task<int> GetBalance(string accountId)
         {
             try
             {
@@ -184,8 +186,8 @@ namespace MemberManagementSystem
                 {
                     connection.Open();
 
-                    using var command = new SqlCommand("SELECT Balance FROM Account WHERE Name=@value1;", connection);
-                    command.Parameters.AddWithValue("@value1", membername);
+                    using var command = new SqlCommand("SELECT Balance FROM Account WHERE AccountId=@value1;", connection);
+                    command.Parameters.AddWithValue("@value1", accountId);
 
                     int result = 0;
                     using var reader = await command.ExecuteReaderAsync();
@@ -211,17 +213,51 @@ namespace MemberManagementSystem
             }
         }
 
-        public async Task<List<Member>> GetMember()
+        public async Task<List<Member>> GetMember(string option, string option1)
         {
             try
             {
+                int value = 0;
+                if (String.IsNullOrEmpty(option1) == false)
+                {
+                    value = Int32.Parse(option1);
+                }
+
+                string sql = "SELECT * FROM Member;";
+                string part1 = "SELECT * FROM Member m JOIN[DatabaseMemberManagement].[dbo].[Account] a ON a.MemberName = m.Name";
+                
+                switch (option)
+                {
+                    case "2":
+                        sql = part1 + " WHERE Status='active';";
+                        break;
+                    case "3":
+                        sql = part1 + " WHERE Status='inactive';";
+                        break;
+                    case "4":
+                        sql = part1 + " WHERE Status='active' AND Balance >'" +option1+"';";
+                        break;
+                    case "5":
+                        sql = part1 + " WHERE Status='active' AND Balance <'" + option1 + "';";
+                        break;
+                    case "6":
+                        sql = part1 + " WHERE Status='inactive' AND Balance >'" + option1 + "';";
+                        break;
+                    case "7":
+                        sql = part1 + " WHERE Status='inactive' AND Balance <'" + option1 + "';";
+                        break;
+                    default:
+                        sql = "SELECT * FROM Member;";
+                        break;
+                }
+
                 var memberList = new List<Member>();
 
                 using (var connection = new SqlConnection(CONNECTIONSTRING))
                 {
                     connection.Open();
 
-                    using var command = new SqlCommand("SELECT * FROM Member;", connection);
+                    using var command = new SqlCommand(sql, connection);
 
                     using var reader = await command.ExecuteReaderAsync();
                     while (await reader.ReadAsync())
@@ -237,17 +273,45 @@ namespace MemberManagementSystem
 
                             foreach(var item in await GetAccounts(tempMember.Name))
                             {
-                                tempAccountList.Add(new Account()
+                                var tempAccount = new Account()
                                 {
                                     Name = item.Name,
                                     Balance = item.Balance,
                                     Status = item.Status
-                                });
+                                };
+
+                                if (option == "2" && item.Status == "active")
+                                {
+                                    tempAccountList.Add(tempAccount);
+                                }
+                                else if (option == "3" && item.Status == "inactive")
+                                {
+                                    tempAccountList.Add(tempAccount);
+                                }
+                                else if (option == "4" && item.Status == "active" && item.Balance > value )
+                                {
+                                    tempAccountList.Add(tempAccount);
+                                }
+                                else if (option == "5" && item.Status == "active" && item.Balance < value )
+                                {
+                                    tempAccountList.Add(tempAccount);
+                                }
+                                else if (option == "6" && item.Status == "inactive" && item.Balance > value)
+                                {
+                                    tempAccountList.Add(tempAccount);
+                                }
+                                else if (option == "7" && item.Status == "inactive" && item.Balance < value)
+                                {
+                                    tempAccountList.Add(tempAccount);
+                                }
+                                else if(String.IsNullOrEmpty(option) && String.IsNullOrEmpty(option1) || option == "1" && String.IsNullOrEmpty(option1))
+                                {
+                                    tempAccountList.Add(tempAccount);
+                                }
                             }
 
                             tempMember.Accounts = tempAccountList;
                             memberList.Add(tempMember);
-                            
                         }
                         catch (Exception ex)
                         {
@@ -351,6 +415,7 @@ namespace MemberManagementSystem
 
         public async Task<bool> CheckIfAccountNameExist(string membername)
         {
+            // TODO: Muss geändert werden
             try
             {
                 using (var connection = new SqlConnection(CONNECTIONSTRING))
@@ -376,7 +441,7 @@ namespace MemberManagementSystem
                                 return true;
                             }
                         }
-                        catch (Exception ex)
+                        catch
                         {
                             return false;
                         }

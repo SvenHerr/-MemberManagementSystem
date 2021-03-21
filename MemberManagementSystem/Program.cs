@@ -21,9 +21,9 @@ namespace MemberManagementSystem
                 Console.WriteLine("2: Create Account");
                 Console.WriteLine("3: Collect Coints");
                 Console.WriteLine("4: Redeem Coints");
-                //Console.WriteLine("5: Import Json");
-                Console.WriteLine("5: Export Json");
-                Console.WriteLine("6: Dump Logfile");
+                Console.WriteLine("5: Import Json");
+                Console.WriteLine("6: Export Json");
+                Console.WriteLine("7: Dump Logfile");
 
                 Console.WriteLine("Please select an option by type the number and hit enter" + Environment.NewLine);
 
@@ -36,7 +36,7 @@ namespace MemberManagementSystem
                     {
                         programmNr = Int32.Parse(CheckIfExit(Console.ReadLine()));
 
-                        if (programmNr >= 1 && programmNr <= 6)
+                        if (programmNr >= 1 && programmNr <= 7)
                         {
                             terminar = true;
                             break;
@@ -44,7 +44,7 @@ namespace MemberManagementSystem
                     }
                     catch{}
 
-                    Console.WriteLine("Not a number. Please enter a number between 1 and 6" + Environment.NewLine);
+                    Console.WriteLine("Not a number. Please enter a number between 1 and 7" + Environment.NewLine);
                     terminar = false;
                 }
 
@@ -68,13 +68,13 @@ namespace MemberManagementSystem
                 case 4:
                     RedeemCoints();
                     break;
-                //case 5:
-                //    ImportJson();
-                //    break;
                 case 5:
-                    Export();
+                    ImportJson();
                     break;
                 case 6:
+                    Export();
+                    break;
+                case 7:
                     DumpLogFile();
                     break;
             }
@@ -177,7 +177,7 @@ namespace MemberManagementSystem
                 Console.WriteLine("Please enter an accountname:");
                 Console.WriteLine("Example: Burger King");
                 account.Name = CheckIfExit(Console.ReadLine());
-
+                 
                 accountExistes = dbHelper.CheckIfAccountNameExist(account.Name).Result;
             }
 
@@ -225,6 +225,11 @@ namespace MemberManagementSystem
 
         public static void CollectCoints()
         {
+            Console.WriteLine(Environment.NewLine + "Please enter Membername:");
+            Console.WriteLine("Example: Sven Herrmann");
+
+            var memberName = CheckIfExit(Console.ReadLine());
+
             Console.WriteLine(Environment.NewLine + "Please enter Accountname:");
             Console.WriteLine("Example: Burger King");
 
@@ -251,7 +256,9 @@ namespace MemberManagementSystem
             var temp = new Account()
             {
                 Name = accountName,
-                Balance = valueCoints
+                Balance = valueCoints,
+                MemberName = memberName,
+                AccountId = accountName + memberName
             };
 
             if (accountName != null)
@@ -271,6 +278,11 @@ namespace MemberManagementSystem
 
         public static void RedeemCoints()
         {
+            Console.WriteLine(Environment.NewLine + "Please enter Membername:");
+            Console.WriteLine("Example: Sven Herrmann");
+
+            var memberName = CheckIfExit(Console.ReadLine());
+
             Console.WriteLine(Environment.NewLine + "Please enter Accountname:");
             Console.WriteLine("Example: Burger King");
 
@@ -297,7 +309,9 @@ namespace MemberManagementSystem
             var temp = new Account()
             {
                 Name = accountName,
-                Balance = valueCoints
+                Balance = valueCoints,
+                MemberName = memberName,
+                AccountId = accountName + memberName
             };
 
             if (accountName != null)
@@ -315,11 +329,49 @@ namespace MemberManagementSystem
             }
         }
 
-        //public static void ImportJson()
-        //{
-        //    Console.WriteLine(Environment.NewLine + "Bitte Pfad angeben:");
+        public static void ImportJson()
+        {
+            var error = false;
+            Console.WriteLine(Environment.NewLine + "Please enter Path to import json file:");
+            Console.WriteLine("Example: C:\\Users\\Sven\\Downloads\\members.json");
 
-        //}
+            var path = CheckIfExit(Console.ReadLine());
+
+            using (StreamReader r = new StreamReader(path))
+            {
+                string json = r.ReadToEnd();
+                List<Member> items = JsonConvert.DeserializeObject<List<Member>>(json);
+
+                var dbHelper = new DbHelper();
+
+                foreach(var member in items)
+                {
+                    if (dbHelper.StoreMemberToDb(member) == false)
+                    {
+                        error = true;
+                    }
+
+                    foreach (var account in member.Accounts)
+                    {
+                        if (dbHelper.StoreAccountToDb(account) == false)
+                        {
+                            error = true;
+                        }
+
+                        account.MemberName = member.Name;
+                    }
+                }
+            }
+
+            if(error == false)
+            {
+                Console.WriteLine("File successfull imported " + Environment.NewLine);
+            }
+            else
+            {
+                Console.WriteLine("File imported with errors. Please check log " + Environment.NewLine);
+            }
+        }
 
         public static void Export()
         {
@@ -327,8 +379,26 @@ namespace MemberManagementSystem
             Console.WriteLine("Example: C:\\Users\\Sven\\Desktop\\myJson.json");
             var path = CheckIfExit(Console.ReadLine());
 
+            Console.WriteLine("If you want you can choos an additional option fot the export: (empty for default)");
+            Console.WriteLine("1: Export all");
+            Console.WriteLine("2: Export all actives");
+            Console.WriteLine("3: Export all inactives");
+            Console.WriteLine("4: Export all actives with balance more than:");
+            Console.WriteLine("5: Export all actives with balance less than:");
+            Console.WriteLine("6: Export all inactives with balance more than:");
+            Console.WriteLine("7: Export all inactives with balance less than:");
+
+            var option = CheckIfExit(Console.ReadLine());
+            
+            string option1 = null;
+            if(option == "4" || option == "5" || option == "6" || option == "7" || option == "")
+            {
+                Console.WriteLine("Add the value:");
+                option1 = CheckIfExit(Console.ReadLine());
+            }
+
             DbHelper dbHelper = new DbHelper();
-            var memberList =  dbHelper.GetMember()?.Result ?? new List<Member>();
+            var memberList =  dbHelper.GetMember(option, option1)?.Result ?? new List<Member>();
 
             //using (StreamWriter file = File.CreateText(@"C:\Users\Sven\Desktop\myJson.json"))
             using (StreamWriter file = File.CreateText(path))
@@ -338,7 +408,7 @@ namespace MemberManagementSystem
             }
 
             Console.WriteLine("export created in " + path + Environment.NewLine);
-
+            Console.WriteLine(Environment.NewLine);
         }
     }
 }
